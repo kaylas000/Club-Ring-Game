@@ -1,54 +1,78 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import Phaser from 'phaser';
+import { gameConfig } from './game/GameConfig';
+import { useGameStore } from './store/gameStore';
 import { GameScreen } from './types';
 
-// Placeholder components - будут созданы позже
-const MenuScreen = () => (
-  <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-secondary to-secondary-dark text-white">
-    <h1 className="text-6xl font-display mb-8">🥊 CLUB RING</h1>
-    <div className="text-xl mb-4">Telegram Boxing Game</div>
-    <button className="px-8 py-4 bg-primary hover:bg-primary-dark rounded-lg text-2xl font-bold transition-colors">
-      START GAME
-    </button>
-    <div className="mt-8 text-sm opacity-70">v0.1.0 - MVP in Development</div>
-  </div>
-);
-
 function App() {
-  const [currentScreen, setCurrentScreen] = useState<GameScreen>('MENU');
-  const [isLoading, setIsLoading] = useState(true);
+  const [gameStarted, setGameStarted] = useState(false);
+  const gameRef = useRef<Phaser.Game | null>(null);
+  const { currentScreen, setCurrentScreen, setError } = useGameStore();
 
   useEffect(() => {
-    // Initialize game
-    const init = async () => {
+    // Initialize Telegram WebApp
+    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+      const tg = window.Telegram.WebApp;
+      tg.ready();
+      tg.expand();
+
+      // Set theme
+      document.documentElement.classList.add(
+        tg.colorScheme === 'dark' ? 'dark' : 'light'
+      );
+
+      // Get user data
+      const userData = tg.initDataUnsafe?.user;
+      console.log('Telegram User:', userData);
+    }
+
+    // Initialize game only once
+    if (!gameStarted && currentScreen === 'MENU') {
       try {
-        // TODO: Initialize Telegram SDK
-        // TODO: Load player profile
-        // TODO: Connect to backend
-        
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setIsLoading(false);
+        gameRef.current = new Phaser.Game(gameConfig);
+        setGameStarted(true);
+        console.log('✅ Phaser game initialized');
       } catch (error) {
-        console.error('Failed to initialize:', error);
-        setIsLoading(false);
+        console.error('Failed to initialize Phaser:', error);
+        setError('Failed to initialize game');
       }
+    }
+
+    return () => {
+      // Cleanup: don't destroy game on unmount (it persists)
     };
+  }, [gameStarted, currentScreen, setError]);
 
-    init();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-secondary">
-        <div className="text-white text-2xl">Loading Club Ring...</div>
-      </div>
-    );
-  }
-
-  // Router будет добавлен позже
   return (
-    <div className="app">
-      {currentScreen === 'MENU' && <MenuScreen />}
-      {/* Другие экраны будут добавлены позже */}
+    <div className="min-h-screen bg-secondary text-white">
+      {/* Phaser game container */}
+      <div id="game-container" className="w-full h-screen overflow-hidden">
+        {/* Phaser will render here */}
+      </div>
+
+      {/* Game overlay (react components on top) */}
+      {currentScreen === 'MENU' && <MenuOverlay />}
+      {currentScreen === 'COMBAT' && <CombatOverlay />}
+    </div>
+  );
+}
+
+function MenuOverlay() {
+  return (
+    <div className="fixed inset-0 pointer-events-none">
+      <div className="absolute top-4 left-4 z-50 pointer-events-auto">
+        <button className="px-4 py-2 bg-primary rounded-lg hover:bg-primary-dark transition-colors">
+          ⚙️ Settings
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function CombatOverlay() {
+  return (
+    <div className="fixed inset-0 pointer-events-none">
+      {/* Additional UI on top of Phaser combat scene */}
     </div>
   );
 }
