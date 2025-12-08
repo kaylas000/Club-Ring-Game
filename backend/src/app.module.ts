@@ -8,11 +8,11 @@ import { AppService } from './app.service';
 // Configuration
 import configuration from './config/configuration';
 
-// Modules (будут созданы позже)
-// import { AuthModule } from './modules/auth/auth.module';
-// import { PlayersModule } from './modules/players/players.module';
-// import { MatchesModule } from './modules/matches/matches.module';
-// import { CombatModule } from './modules/combat/combat.module';
+// Modules
+import { AuthModule } from './modules/auth/auth.module';
+import { PlayersModule } from './modules/players/players.module';
+import { MatchesModule } from './modules/matches/matches.module';
+import { CombatModule } from './modules/combat/combat.module';
 
 @Module({
   imports: [
@@ -35,6 +35,8 @@ import configuration from './config/configuration';
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: configService.get('NODE_ENV') === 'development',
         logging: configService.get('NODE_ENV') === 'development',
+        migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
+        migrationsRun: true,
       }),
       inject: [ConfigService],
     }),
@@ -52,11 +54,11 @@ import configuration from './config/configuration';
       inject: [ConfigService],
     }),
 
-    // Feature modules будут добавлены позже
-    // AuthModule,
-    // PlayersModule,
-    // MatchesModule,
-    // CombatModule,
+    // Feature modules
+    AuthModule,
+    PlayersModule,
+    MatchesModule,
+    CombatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

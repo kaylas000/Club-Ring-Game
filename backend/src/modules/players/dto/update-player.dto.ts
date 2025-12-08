@@ -13,4 +13,9 @@ export class UpdatePlayerDto {
   @Min(0)
   @IsOptional()
   ringTokens?: number;
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  level?: number;
 }
