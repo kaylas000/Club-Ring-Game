@@ -5,108 +5,71 @@ export class MenuScene extends Phaser.Scene {
     super({ key: 'MenuScene' });
   }
 
-  create() {
-    const { width, height } = this.scale;
-
-    // Background gradient
-    const bg = this.add.rectangle(width / 2, height / 2, width, height, 0x004e89);
-    bg.setOrigin(0.5);
-
+  create(): void {
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+    
+    // Background
+    this.cameras.main.setBackgroundColor('#004E89');
+    
     // Title
     const title = this.add.text(width / 2, height / 4, '🥊 CLUB RING', {
-      fontSize: '96px',
+      fontSize: '80px',
       color: '#FF6B35',
       fontStyle: 'bold',
     });
     title.setOrigin(0.5);
-
+    title.setScale(1.2);
+    
     // Subtitle
-    const subtitle = this.add.text(width / 2, height / 3 + 60, 'Telegram Boxing Game', {
+    const subtitle = this.add.text(width / 2, height / 4 + 100, 'Telegram Boxing Game', {
       fontSize: '32px',
-      color: '#FFFFFF',
+      color: '#FFD23F',
     });
     subtitle.setOrigin(0.5);
-
-    // Start button
-    const startBtn = this.createButton(
-      width / 2,
-      height / 2,
-      'START BATTLE',
-      () => {
-        this.scene.start('BattleScene');
-      }
-    );
-
-    // Training button
-    const trainingBtn = this.createButton(
-      width / 2,
-      height / 2 + 100,
-      'TRAINING',
-      () => {
-        console.log('Training mode');
-      }
-    );
-
-    // Settings button
-    const settingsBtn = this.createButton(
-      width / 2,
-      height / 2 + 200,
-      'SETTINGS',
-      () => {
-        console.log('Settings');
-      }
-    );
-
-    // Version text
-    this.add.text(width - 20, height - 20, 'v0.1.0 - MVP', {
+    
+    // Buttons
+    this.createButton(width / 2, height / 2 - 80, 'START MATCH', () => {
+      this.scene.start('CombatScene');
+    });
+    
+    this.createButton(width / 2, height / 2, 'LEADERBOARD', () => {
+      console.log('Leaderboard not implemented yet');
+    });
+    
+    this.createButton(width / 2, height / 2 + 80, 'TRAINING', () => {
+      console.log('Training not implemented yet');
+    });
+    
+    this.createButton(width / 2, height / 2 + 160, 'SHOP', () => {
+      console.log('Shop not implemented yet');
+    });
+    
+    // Version info
+    const version = this.add.text(width - 20, height - 20, 'v0.1.0 - MVP', {
       fontSize: '14px',
       color: '#888888',
-    }).setOrigin(1, 1);
+    });
+    version.setOrigin(1, 1);
   }
-
+  
   private createButton(
     x: number,
     y: number,
     text: string,
     callback: () => void
-  ): Phaser.GameObjects.Container {
-    const btn = this.add.container(x, y);
-
-    // Button background
-    const bg = this.add.rectangle(0, 0, 300, 60, 0xFF6B35);
-    bg.setInteractive();
-
-    // Button text
-    const txt = this.add.text(0, 0, text, {
-      fontSize: '28px',
-      color: '#FFFFFF',
+  ): void {
+    const button = this.add.rectangle(x, y, 300, 60, 0xFF6B35);
+    button.setInteractive();
+    button.on('pointerover', () => button.setFillStyle(0xFF8558));
+    button.on('pointerout', () => button.setFillStyle(0xFF6B35));
+    button.on('pointerdown', callback);
+    
+    const buttonText = this.add.text(x, y, text, {
+      fontSize: '24px',
+      color: '#ffffff',
       fontStyle: 'bold',
     });
-    txt.setOrigin(0.5);
-
-    btn.add([bg, txt]);
-
-    // Hover effects
-    bg.on('pointerover', () => {
-      this.tweens.add({
-        targets: bg,
-        scaleX: 1.1,
-        scaleY: 1.1,
-        duration: 200,
-      });
-    });
-
-    bg.on('pointerout', () => {
-      this.tweens.add({
-        targets: bg,
-        scaleX: 1,
-        scaleY: 1,
-        duration: 200,
-      });
-    });
-
-    bg.on('pointerdown', callback);
-
-    return btn;
+    buttonText.setOrigin(0.5);
   }
 }
