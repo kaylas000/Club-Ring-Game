@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, BadRequestException } from '@nestjs/common';
 import { MatchesService } from './matches.service';
 import { CreateMatchDto } from './dto';
 
@@ -11,9 +11,30 @@ export class MatchesController {
     return this.matchesService.create(createMatchDto);
   }
 
+  @Post('start')
+  async startMatch(
+    @Body() data: { player1Id: string; player2Id: string },
+  ) {
+    if (!data.player1Id || !data.player2Id) {
+      throw new BadRequestException('player1Id and player2Id are required');
+    }
+
+    const matchId = `match_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return await this.matchesService.initializeMatch(
+      matchId,
+      data.player1Id,
+      data.player2Id,
+    );
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.matchesService.findOne(id);
+  }
+
+  @Get(':id/state')
+  async getMatchState(@Param('id') matchId: string) {
+    return await this.matchesService.getMatchState(matchId);
   }
 
   @Get('player/:playerId')
@@ -29,18 +50,23 @@ export class MatchesController {
     return this.matchesService.getMatchStats(playerId);
   }
 
-  @Post(':id/complete')
-  completeMatch(
-    @Param('id') id: string,
-    @Body() data: {
-      winnerId: string;
-      player1Score: number;
-      player2Score: number;
-      duration: number;
+  @Post(':matchId/complete')
+  async completeMatch(
+    @Param('matchId') matchId: string,
+    @Body()
+    data: {
+      winnerId: string; // player1Id, player2Id, or 'DRAW'
+      player1Score: number; // damage dealt
+      player2Score: number; // damage dealt
+      duration: number; // seconds
     },
   ) {
-    return this.matchesService.completeMatch(
-      data.winnerId,
+    if (!matchId || !data.winnerId) {
+      throw new BadRequestException('matchId and winnerId are required');
+    }
+
+    return await this.matchesService.completeMatch(
+      matchId,
       data.winnerId,
       data.player1Score,
       data.player2Score,
