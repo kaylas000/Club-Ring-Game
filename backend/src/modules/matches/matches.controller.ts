@@ -37,6 +37,15 @@ export class MatchesController {
     return await this.matchesService.getMatchState(matchId);
   }
 
+  /**
+   * Get match history with all actions
+   * GET /matches/:id/history
+   */
+  @Get(':id/history')
+  async getMatchHistory(@Param('id') matchId: string) {
+    return await this.matchesService.getMatchHistory(matchId);
+  }
+
   @Get('player/:playerId')
   findByPlayer(
     @Param('playerId') playerId: string,
