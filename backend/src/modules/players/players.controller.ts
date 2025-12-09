@@ -19,9 +19,34 @@ export class PlayersController {
     return this.playersService.findAll(parseInt(page), parseInt(limit));
   }
 
+  /**
+   * Get leaderboard with top players
+   * GET /players/leaderboard?limit=100&offset=0
+   */
   @Get('leaderboard')
-  getLeaderboard(@Query('limit') limit: string = '100') {
-    return this.playersService.getLeaderboard(parseInt(limit));
+  async getLeaderboard(
+    @Query('limit') limit: string = '100',
+    @Query('offset') offset: string = '0',
+  ) {
+    return await this.playersService.getLeaderboard(parseInt(limit), parseInt(offset));
+  }
+
+  /**
+   * Get detailed statistics for a player
+   * GET /players/:id/stats
+   */
+  @Get(':id/stats')
+  async getDetailedStats(@Param('id') id: string) {
+    return await this.playersService.getDetailedStats(id);
+  }
+
+  /**
+   * Level up a player
+   * POST /players/:id/level-up
+   */
+  @Post(':id/level-up')
+  async levelUp(@Param('id') id: string) {
+    return await this.playersService.levelUp(id);
   }
 
   @Get(':id')
