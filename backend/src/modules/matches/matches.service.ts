@@ -233,4 +233,45 @@ export class MatchesService {
       };
     }
   }
+
+  /**
+   * Get match history with all actions
+   */
+  async getMatchHistory(matchId: string): Promise<any> {
+    const match = await this.findByMatchId(matchId);
+    if (!match) {
+      throw new NotFoundException(`Match ${matchId} not found`);
+    }
+
+    // Get state from CombatService if available
+    try {
+      const state = this.combatService.getMatchState(matchId);
+      return {
+        matchId,
+        status: match.status,
+        winner: match.winnerId,
+        rounds: state.rounds || [],
+        finalScore: {
+          player1: match.player1Score,
+          player2: match.player2Score,
+        },
+        duration: match.duration,
+        completedAt: match.completedAt,
+      };
+    } catch (error) {
+      // Match history archived
+      return {
+        matchId,
+        status: match.status,
+        winner: match.winnerId,
+        finalScore: {
+          player1: match.player1Score,
+          player2: match.player2Score,
+        },
+        duration: match.duration,
+        completedAt: match.completedAt,
+        message: 'Match history archived',
+      };
+    }
+  }
 }
